@@ -21,6 +21,7 @@ func TestResolveInstanceTypes(t *testing.T) {
 		nodes     []*corev1.Node
 		nodeNames []string
 		want      map[string]string
+		wantErr   bool
 	}{
 		{
 			name:      "new label",
@@ -61,6 +62,13 @@ func TestResolveInstanceTypes(t *testing.T) {
 			nodeNames: []string{"n1", "n1"},
 			want:      map[string]string{"n1": "m5.large"},
 		},
+		{
+			name:      "node get error bubbles up",
+			nodes:     []*corev1.Node{},
+			nodeNames: []string{"missing-node"},
+			want:      nil,
+			wantErr:   true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -71,10 +79,10 @@ func TestResolveInstanceTypes(t *testing.T) {
 			}
 			client := fake.NewSimpleClientset(objects...)
 			got, err := resolveInstanceTypes(context.Background(), client, tt.nodeNames)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("err = %v, wantErr = %v", err, tt.wantErr)
 			}
-			if !reflect.DeepEqual(got, tt.want) {
+			if !tt.wantErr && !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("got %v, want %v", got, tt.want)
 			}
 		})
