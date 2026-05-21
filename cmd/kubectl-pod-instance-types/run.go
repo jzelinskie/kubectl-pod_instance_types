@@ -13,7 +13,7 @@ import (
 	"k8s.io/kubectl/pkg/cmd/util"
 )
 
-func run(ctx context.Context, factory util.Factory, printFlags *genericclioptions.PrintFlags, allNamespaces bool, streams genericclioptions.IOStreams) error {
+func run(ctx context.Context, factory util.Factory, printFlags *genericclioptions.PrintFlags, allNamespaces bool, selector string, streams genericclioptions.IOStreams) error {
 	namespace, _, err := factory.ToRawKubeConfigLoader().Namespace()
 	if err != nil {
 		return err
@@ -36,13 +36,13 @@ func run(ctx context.Context, factory util.Factory, printFlags *genericclioption
 		outputFormat = *printFlags.OutputFormat
 	}
 	if outputFormat != "" {
-		return runNonTable(ctx, clientset, namespace, printFlags, streams)
+		return runNonTable(ctx, clientset, namespace, selector, printFlags, streams)
 	}
-	return runTable(ctx, clientset, namespace, streams)
+	return runTable(ctx, clientset, namespace, selector, streams)
 }
 
-func runTable(ctx context.Context, clientset kubernetes.Interface, namespace string, streams genericclioptions.IOStreams) error {
-	table, err := fetchPodsAsTable(ctx, clientset, namespace)
+func runTable(ctx context.Context, clientset kubernetes.Interface, namespace string, selector string, streams genericclioptions.IOStreams) error {
+	table, err := fetchPodsAsTable(ctx, clientset, namespace, selector)
 	if err != nil {
 		return err
 	}
@@ -59,12 +59,16 @@ func runTable(ctx context.Context, clientset kubernetes.Interface, namespace str
 	return p.PrintObj(table, streams.Out)
 }
 
-func fetchPodsAsTable(ctx context.Context, clientset kubernetes.Interface, namespace string) (*metav1.Table, error) {
-	data, err := clientset.CoreV1().RESTClient().Get().
+func fetchPodsAsTable(ctx context.Context, clientset kubernetes.Interface, namespace string, selector string) (*metav1.Table, error) {
+	req := clientset.CoreV1().RESTClient().Get().
 		Namespace(namespace).
 		Resource("pods").
-		SetHeader("Accept", "application/json;as=Table;v=v1;g=meta.k8s.io,application/json").
-		DoRaw(ctx)
+		Param("includeObject", "Object").
+		SetHeader("Accept", "application/json;as=Table;v=v1;g=meta.k8s.io,application/json;as=Table;v=v1beta1;g=meta.k8s.io,application/json")
+	if selector != "" {
+		req = req.Param("labelSelector", selector)
+	}
+	data, err := req.DoRaw(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("fetching pods: %w", err)
 	}
@@ -112,8 +116,8 @@ func augmentTable(table *metav1.Table, nodeNames []string, instanceTypes map[str
 	}
 }
 
-func runNonTable(ctx context.Context, clientset kubernetes.Interface, namespace string, printFlags *genericclioptions.PrintFlags, streams genericclioptions.IOStreams) error {
-	pods, err := clientset.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
+func runNonTable(ctx context.Context, clientset kubernetes.Interface, namespace string, selector string, printFlags *genericclioptions.PrintFlags, streams genericclioptions.IOStreams) error {
+	pods, err := clientset.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: selector})
 	if err != nil {
 		return fmt.Errorf("listing pods: %w", err)
 	}

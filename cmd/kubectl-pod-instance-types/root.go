@@ -16,19 +16,21 @@ func newRootCmd(streams genericclioptions.IOStreams) *cobra.Command {
 	printFlags := genericclioptions.NewPrintFlags("").WithTypeSetter(scheme.Scheme)
 
 	var allNamespaces bool
+	var selector string
 
 	cmd := &cobra.Command{
 		Use:          filepath.Base(os.Args[0]) + " [flags]",
 		Short:        "List pods with their node's cloud instance type",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return run(cmd.Context(), factory, printFlags, allNamespaces, streams)
+			return run(cmd.Context(), factory, printFlags, allNamespaces, selector, streams)
 		},
 	}
 
 	configFlags.AddFlags(cmd.Flags())
 	printFlags.AddFlags(cmd)
 	cmd.Flags().BoolVarP(&allNamespaces, "all-namespaces", "A", false, "List pods in all namespaces")
+	cmd.Flags().StringVarP(&selector, "selector", "l", "", "Selector (label query) to filter on")
 
 	return cmd
 }
