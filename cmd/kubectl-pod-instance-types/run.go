@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/cli-runtime/pkg/printers"
@@ -112,5 +113,39 @@ func augmentTable(table *metav1.Table, nodeNames []string, instanceTypes map[str
 }
 
 func runNonTable(ctx context.Context, clientset kubernetes.Interface, namespace string, printFlags *genericclioptions.PrintFlags, streams genericclioptions.IOStreams) error {
-	return fmt.Errorf("output format %q is not yet supported", *printFlags.OutputFormat)
+	pods, err := clientset.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("listing pods: %w", err)
+	}
+
+	nodeNames := make([]string, len(pods.Items))
+	for i, pod := range pods.Items {
+		nodeNames[i] = pod.Spec.NodeName
+	}
+
+	instanceTypes, err := resolveInstanceTypes(ctx, clientset, nodeNames)
+	if err != nil {
+		return fmt.Errorf("resolving instance types: %w", err)
+	}
+
+	annotatePods(pods, instanceTypes)
+
+	printer, err := printFlags.ToPrinter()
+	if err != nil {
+		return err
+	}
+	return printer.PrintObj(pods, streams.Out)
+}
+
+func annotatePods(pods *corev1.PodList, instanceTypes map[string]string) {
+	for i := range pods.Items {
+		nodeName := pods.Items[i].Spec.NodeName
+		if nodeName == "" {
+			continue
+		}
+		if pods.Items[i].Annotations == nil {
+			pods.Items[i].Annotations = make(map[string]string)
+		}
+		pods.Items[i].Annotations[labelInstanceType] = instanceTypes[nodeName]
+	}
 }

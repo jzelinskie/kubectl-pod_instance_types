@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -51,5 +52,29 @@ func TestExtractNodeNames(t *testing.T) {
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestAnnotatePods(t *testing.T) {
+	pods := &corev1.PodList{
+		Items: []corev1.Pod{
+			{
+				ObjectMeta: metav1.ObjectMeta{Name: "pod-1"},
+				Spec:       corev1.PodSpec{NodeName: "node-a"},
+			},
+			{
+				ObjectMeta: metav1.ObjectMeta{Name: "pod-2"},
+				Spec:       corev1.PodSpec{NodeName: ""},
+			},
+		},
+	}
+	instanceTypes := map[string]string{"node-a": "m5.large"}
+	annotatePods(pods, instanceTypes)
+
+	if pods.Items[0].Annotations[labelInstanceType] != "m5.large" {
+		t.Errorf("pod-1: expected annotation %q, got %q", "m5.large", pods.Items[0].Annotations[labelInstanceType])
+	}
+	if _, ok := pods.Items[1].Annotations[labelInstanceType]; ok {
+		t.Errorf("pod-2: expected no annotation for pending pod, got %q", pods.Items[1].Annotations[labelInstanceType])
 	}
 }
