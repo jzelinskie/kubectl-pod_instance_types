@@ -97,7 +97,7 @@ func extractNodeNames(table *metav1.Table) []string {
 
 func augmentTable(table *metav1.Table, nodeNames []string, instanceTypes map[string]string) {
 	table.ColumnDefinitions = append(table.ColumnDefinitions, metav1.TableColumnDefinition{
-		Name: "Instance Type",
+		Name: "Instance-Type",
 		Type: "string",
 	})
 	for i := range table.Rows {
@@ -111,7 +111,6 @@ func augmentTable(table *metav1.Table, nodeNames []string, instanceTypes map[str
 	}
 }
 
-// runNonTable is a stub; implemented in Task 5.
 func runNonTable(ctx context.Context, clientset kubernetes.Interface, namespace string, printFlags *genericclioptions.PrintFlags, streams genericclioptions.IOStreams) error {
-	return nil
+	return fmt.Errorf("output format %q is not yet supported", *printFlags.OutputFormat)
 }

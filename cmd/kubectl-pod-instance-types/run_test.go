@@ -26,8 +26,8 @@ func TestAugmentTable(t *testing.T) {
 	if len(table.ColumnDefinitions) != 6 {
 		t.Fatalf("expected 6 columns, got %d", len(table.ColumnDefinitions))
 	}
-	if table.ColumnDefinitions[5].Name != "Instance Type" {
-		t.Errorf("expected column %q, got %q", "Instance Type", table.ColumnDefinitions[5].Name)
+	if table.ColumnDefinitions[5].Name != "Instance-Type" {
+		t.Errorf("expected column %q, got %q", "Instance-Type", table.ColumnDefinitions[5].Name)
 	}
 	if table.Rows[0].Cells[5] != "m5.large" {
 		t.Errorf("row 0: expected %q, got %v", "m5.large", table.Rows[0].Cells[5])
