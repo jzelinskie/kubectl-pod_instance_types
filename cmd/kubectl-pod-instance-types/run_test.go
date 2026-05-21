@@ -77,4 +77,19 @@ func TestAnnotatePods(t *testing.T) {
 	if _, ok := pods.Items[1].Annotations[labelInstanceType]; ok {
 		t.Errorf("pod-2: expected no annotation for pending pod, got %q", pods.Items[1].Annotations[labelInstanceType])
 	}
+
+	// node with no instance-type label produces empty string in the map;
+	// annotation should be absent, not set to ""
+	pods2 := &corev1.PodList{
+		Items: []corev1.Pod{
+			{
+				ObjectMeta: metav1.ObjectMeta{Name: "pod-3"},
+				Spec:       corev1.PodSpec{NodeName: "unlabeled-node"},
+			},
+		},
+	}
+	annotatePods(pods2, map[string]string{"unlabeled-node": ""})
+	if _, ok := pods2.Items[0].Annotations[labelInstanceType]; ok {
+		t.Errorf("pod-3: expected no annotation for node without instance-type label")
+	}
 }

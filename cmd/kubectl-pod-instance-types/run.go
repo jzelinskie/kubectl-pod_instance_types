@@ -143,9 +143,11 @@ func annotatePods(pods *corev1.PodList, instanceTypes map[string]string) {
 		if nodeName == "" {
 			continue
 		}
-		if pods.Items[i].Annotations == nil {
-			pods.Items[i].Annotations = make(map[string]string)
+		if it := instanceTypes[nodeName]; it != "" {
+			if pods.Items[i].Annotations == nil {
+				pods.Items[i].Annotations = make(map[string]string)
+			}
+			pods.Items[i].Annotations[labelInstanceType] = it
 		}
-		pods.Items[i].Annotations[labelInstanceType] = instanceTypes[nodeName]
 	}
 }
