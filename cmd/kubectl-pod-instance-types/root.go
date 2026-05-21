@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -21,7 +19,7 @@ func newRootCmd(streams genericclioptions.IOStreams) *cobra.Command {
 		Short:        "List pods with their node's cloud instance type",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return run(context.Background(), factory, printFlags, allNamespaces, streams)
+			return run(cmd.Context(), factory, printFlags, allNamespaces, streams)
 		},
 	}
 
