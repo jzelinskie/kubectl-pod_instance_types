@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -15,7 +18,7 @@ func newRootCmd(streams genericclioptions.IOStreams) *cobra.Command {
 	var allNamespaces bool
 
 	cmd := &cobra.Command{
-		Use:          "kubectl-pod-instance-types [flags]",
+		Use:          filepath.Base(os.Args[0]) + " [flags]",
 		Short:        "List pods with their node's cloud instance type",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {

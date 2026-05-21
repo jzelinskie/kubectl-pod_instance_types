@@ -1,10 +1,6 @@
 version: 2
 project_name: kubectl-pod-instance-types
 
-before:
-  hooks:
-    - go mod tidy
-
 builds:
   - id: kubectl-pod-instance-types
     main: ./cmd/kubectl-pod-instance-types
@@ -22,16 +18,26 @@ builds:
     env: [CGO_ENABLED=0]
 
 archives:
-  - id: archive
-    ids: [kubectl-pod-instance-types, kubectl-pit]
+  - id: archive-full
+    ids: [kubectl-pod-instance-types]
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+  - id: archive-pit
+    ids: [kubectl-pit]
+    name_template: "kubectl-pit_{{ .Os }}_{{ .Arch }}"
     formats: [tar.gz]
 
 checksum:
   name_template: checksums.txt
 
+release:
+  github:
+    owner: jzelinskie
+    name: pod-instances
+
 krews:
   - name: pod-instance-types
+    ids: [archive-full]
     repository:
       owner: jzelinskie
       name: pod-instances
@@ -44,11 +50,13 @@ krews:
     skip_upload: auto
 
   - name: pit
+    ids: [archive-pit]
     repository:
       owner: jzelinskie
       name: pod-instances
     homepage: https://github.com/jzelinskie/pod-instances
-    short_description: Alias for the pod-instance-types kubectl plugin
+    short_description: List pods with their node's cloud instance type
     description: |
-      Alias for kubectl pod-instance-types. Lists pods with an INSTANCE-TYPE column.
+      Lists pods in a namespace with an additional INSTANCE-TYPE column showing
+      the underlying node's cloud instance type. Alias for kubectl pod-instance-types.
     skip_upload: auto
