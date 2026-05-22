@@ -1,9 +1,6 @@
 # kubectl pod-instance-types
 
-A kubectl plugin to list pods alongside the cloud instance type of the node each
-pod is running on.
-
-Also available as the shorter alias `kubectl pit`.
+A kubectl plugin to list pods alongside the cloud instance type of the node each pod is running on.
 
 ## Installation
 
@@ -42,30 +39,9 @@ $ kubectl pit -n kube-system -o json | jq '.[].metadata.annotations["node.kubern
 ...
 ```
 
-## Flags
-
-- `-n`, `--namespace`: Namespace scope for the request. Defaults to the current
-  kubeconfig namespace.
-
-- `-A`, `--all-namespaces`: List pods across all namespaces.
-
-- `-l`, `--selector`: Selector (label query) to filter pods. Supports equality
-  (`=`, `==`, `!=`) and set-based (`in`, `notin`) operators. Examples:
-  - `-l app=frontend`
-  - `-l "env in (prod,staging)"`
-
-- `-o`, `--output`: Output format. Supported values: `json`, `yaml`, `name`,
-  `jsonpath=<template>`, `custom-columns=<spec>`. Default prints a table with
-  the standard pod columns plus `INSTANCE-TYPE`.
-
-- `--context`: The kubeconfig context to use.
-
-- `--kubeconfig`: Path to the kubeconfig file.
-
 ## How it works
 
-For human-readable output, the plugin requests pods from the API server as a
-server-side table (the same mechanism `kubectl get` uses) and appends an `INSTANCE-TYPE` column populated by looking up each pod's node.
+For human-readable output, the plugin requests pods from the API server as a server-side table (the same mechanism `kubectl get` uses) and appends an `INSTANCE-TYPE` column populated by looking up each pod's node.
 For structured output formats, the instance type is injected as the `node.kubernetes.io/instance-type` annotation on each pod object before serialization.
 
 ## License

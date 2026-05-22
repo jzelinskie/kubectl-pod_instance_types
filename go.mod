@@ -1,4 +1,4 @@
-module github.com/jzelinskie/pod-instances
+module github.com/jzelinskie/kubectl-pod_instance_types
 
 go 1.26.3
 

@@ -1,19 +1,34 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+
 version: 2
-project_name: kubectl-pod_instance_types
+project_name: kubectl-pod-instance-types
+
+before: { hooks: [go test -v ./...] }
 
 builds:
-  - id: kubectl-pod_instance_types
-    main: ./cmd/kubectl-pod_instance_types
+  - main: ./cmd/kubectl-pod_instance_types
     binary: kubectl-pod_instance_types
-    goos: [linux, darwin, windows]
     goarch: [amd64, arm64]
     ldflags: [-s -w]
     env: [CGO_ENABLED=0]
-    ignore: [{ goos: windows, goarch: arm64 }]
 
-archives:
-  - ids: [kubectl-pod_instance_types]
-    name_template: "{{ .ProjectName }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    wrap_in_directory: false
-    format_overrides: [formats: [tar.gz]]
-    files: [LICENSE]
+archives: [{ id: kpit, formats: [binary, tar.gz] }]
+checksum: { name_template: checksums.sha256 }
+sboms: [{ artifacts: binary }]
+
+release:
+  github:
+    owner: jzelinskie
+    name: kubectl-pod_instance_types
+
+krews:
+  - name: pod-instance-types
+    ids: [kpit]
+    skip_upload: true
+    homepage: https://github.com/jzelinskie/kubectl-pod_instance_types
+    short_description: List pods with their node's cloud instance type
+    description: |
+      Lists pods in a namespace with an additional INSTANCE-TYPE column showing
+      the underlying node's cloud instance type.
+      Supports all standard kubectl output format flags (-o json, -o yaml, -o
+      jsonpath, etc.) by injecting an annotation with the instance type.
