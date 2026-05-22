@@ -1,0 +1,41 @@
+apiVersion: krew.googlecontainertools.github.com/v1alpha2
+kind: Plugin
+metadata:
+  name: pod-instance-types
+spec:
+  version: {{ .TagName }}
+  homepage: https://github.com/jzelinskie/kubectl-pod_instance_types
+  shortDescription: List pods with an instance-type column or annotation
+  description: |
+    This plugin lists pods but with an additional column or annotation of the instance type of the underlying node.
+  platforms:
+  - selector:
+      matchLabels:
+        os: darwin
+        arch: amd64
+    {{addURIAndSha "https://github.com/jzelinskie/kubectl-pod_instance_types/releases/download/{{ .TagName }}/kubectl-pod_instance_types_{{ .TagName }}_darwin_amd64.tar.gz" .TagName }}
+    bin: kubectl-pod_instance_types
+  - selector:
+      matchLabels:
+        os: darwin
+        arch: arm64
+    {{addURIAndSha "https://github.com/jzelinskie/kubectl-pod-instance_types/releases/download/{{ .TagName }}/kubectl-pod-instance_types_{{ .TagName }}_darwin_arm64.tar.gz" .TagName }}
+    bin: kubectl-pod-instance_types
+  - selector:
+      matchLabels:
+        os: linux
+        arch: amd64
+    {{addURIAndSha "https://github.com/jzelinskie/kubectl-pod-instance_types/releases/download/{{ .TagName }}/kubectl-pod_instance_types_{{ .TagName }}_linux_amd64.tar.gz" .TagName }}
+    bin: kubectl-pod_instance_types
+  - selector:
+      matchLabels:
+        os: linux
+        arch: arm64
+    {{addURIAndSha "https://github.com/jzelinskie/kubectl-pod-instance_types/releases/download/{{ .TagName }}/kubectl-pod_instance_types_{{ .TagName }}_linux_arm64.tar.gz" .TagName }}
+    bin: kubectl-pod_instance_types
+  - selector:
+      matchLabels:
+        os: windows
+        arch: amd64
+    {{addURIAndSha "https://github.com/jzelinskie/kubectl-pod-instance_types/releases/download/{{ .TagName }}/kubectl-pod_instance_types_{{ .TagName }}_windows_amd64.tar.gz" .TagName }}
+    bin: kubectl-pod_instance_types.exe
